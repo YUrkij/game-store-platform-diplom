@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход - GameStore</title>
+  <style>
+    /* Все стили из home.html */
+    :root { /* ... */ }
+    .dark-theme { /* ... */ }
+    * { /* ... */ }
+    body { /* ... */ }
+    header { /* ... */ }
+    .header-content { /* ... */ }
+    .logo { /* ... */ }
+    .auth-buttons { /* ... */ }
+    .user-info { /* ... */ }
+    .balance { /* ... */ }
+    .btn { /* ... */ }
+    .btn-primary { /* ... */ }
+    .btn-secondary { /* ... */ }
+    .btn-small { /* ... */ }
+    main { /* ... */ }
+    footer { /* ... */ }
+    .footer-content { /* ... */ }
+    .theme-switcher { /* ... */ }
+
+    .form-container {
+        max-width: 400px;
+        margin: 2rem auto;
+        background: var(--bg-card);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+
+    .auth-links {
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .auth-links a {
+        color: var(--accent-primary);
+        text-decoration: none;
+    }
+
+    .error-message {
+        color: #ff6b6b;
+        text-align: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: rgba(255, 107, 107, 0.1);
+        border-radius: 5px;
+    }
+
+    .success-message {
+        color: #51cf66;
+        text-align: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: rgba(81, 207, 102, 0.1);
+        border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <a th:href="@{/home}" class="logo">GameStore</a>
+    <div class="auth-buttons">
+      <a th:href="@{/register}" class="btn btn-primary">Регистрация</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="form-container">
+    <h2 style="text-align: center; margin-bottom: 1.5rem;">Вход в аккаунт</h2>
+
+    <div th:if="${param.error}" class="error-message">
+      Неверное имя пользователя или пароль!
+    </div>
+
+    <div th:if="${param.logout}" class="success-message">
+      Вы успешно вышли из системы!
+    </div>
+
+    <div th:if="${param.success}" class="success-message">
+      Регистрация прошла успешно! Теперь вы можете войти.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+      <div class="form-group">
+        <label for="username">Имя пользователя:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Войти</button>
+    </form>
+
+    <div class="auth-links">
+      <p>Нет аккаунта? <a th:href="@{/register}">Зарегистрироваться</a></p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+    <div class="theme-switcher" onclick="toggleTheme()">
+      <span id="themeText">Тёмная тема</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+      const isDark = document.body.classList.contains('dark-theme');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      document.getElementById('themeText').textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
+  }
+
+  function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+          document.body.classList.add('dark-theme');
+          document.getElementById('themeText').textContent = 'Светлая тема';
+      }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+  });
+</script>
+</body>
+</html>

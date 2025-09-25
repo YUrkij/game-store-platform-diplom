@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - GameStore</title>
+    <style>
+        /* Все стили из common.html */
+        :root { /* ... */ }
+        .dark-theme { /* ... */ }
+        * { /* ... */ }
+        body { /* ... */ }
+        header { /* ... */ }
+        .header-content { /* ... */ }
+        .logo { /* ... */ }
+        .auth-buttons { /* ... */ }
+        .user-info { /* ... */ }
+        .balance { /* ... */ }
+        .btn { /* ... */ }
+        .btn-primary { /* ... */ }
+        .btn-secondary { /* ... */ }
+        .btn-small { /* ... */ }
+        main { /* ... */ }
+        footer { /* ... */ }
+        .footer-content { /* ... */ }
+        .theme-switcher { /* ... */ }
+        .games-grid { /* ... */ }
+        .game-card { /* ... */ }
+        .game-image { /* ... */ }
+        .modal { /* ... */ }
+        .modal-content { /* ... */ }
+
+        /* Дополнительные стили для user */
+        .user-profile {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .profile-info h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .library-section h2 {
+            margin-bottom: 1rem;
+        }
+
+        .empty-library {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .balance-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <div class="logo">GameStore</div>
+        <div class="auth-buttons" id="authButtons"></div>
+    </div>
+</header>
+
+<main>
+    <h1>Личный кабинет</h1>
+
+    <div class="user-profile">
+        <div class="profile-card">
+            <h3>Информация о профиле</h3>
+            <div id="profileInfo">
+                <!-- Заполняется JavaScript -->
+            </div>
+
+            <div class="balance-section">
+                <h3>Баланс: <span id="currentBalance">0</span> ₽</h3>
+                <button class="btn btn-primary" onclick="showAddBalanceModal()">Пополнить</button>
+            </div>
+        </div>
+
+        <div class="library-section">
+            <h2>Моя библиотека игр</h2>
+            <div id="userLibrary">
+                <!-- Библиотека будет здесь -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Модальное окно пополнения баланса -->
+<div id="addBalanceModal" class="modal">
+    <div class="modal-content">
+        <h3>Пополнение баланса</h3>
+        <div class="form-group">
+            <label for="amount">Сумма пополнения (₽):</label>
+            <input type="number" id="amount" min="100" max="10000" value="500">
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button class="btn btn-primary" onclick="addBalance()">Пополнить</button>
+            <button class="btn btn-secondary" onclick="closeModal('addBalanceModal')">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно скачивания -->
+<div id="downloadModal" class="modal">
+    <div class="modal-content">
+        <h3>Скачивание игры</h3>
+        <p id="downloadGameTitle">Игра будет скачана в ближайшее время...</p>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            Это демонстрационная версия. В реальном приложении здесь была бы ссылка на скачивание.
+        </p>
+        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="closeModal('downloadModal')">Закрыть</button>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+        <div class="theme-switcher" onclick="toggleTheme()">
+            <span id="themeText">Тёмная тема</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function loadUserProfile() {
+        if (!currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        document.getElementById('profileInfo').innerHTML = `
+            <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
+            <p><strong>Email:</strong> ${currentUser.email}</p>
+            <p><strong>Роль:</strong> ${currentUser.role}</p>
+            <p><strong>Статус:</strong> ${currentUser.isBanned ? 'Заблокирован' : 'Активен'}</p>
+        `;
+
+        document.getElementById('currentBalance').textContent = currentUser.balance;
+        renderUserLibrary();
+    }
+
+    function renderUserLibrary() {
+        const libraryContainer = document.getElementById('userLibrary');
+        const userGames = currentUser.library || [];
+
+        if (userGames.length === 0) {
+            libraryContainer.innerHTML = `
+                <div class="empty-library">
+                    <h3>Ваша библиотека пуста</h3>
+                    <p>Приобретите игры в <a href="home.html">магазине</a></p>
+                </div>
+            `;
+            return;
+        }
+
+        libraryContainer.innerHTML = userGames.map(game => `
+            <div class="game-card">
+                <img src="${game.image}" alt="${game.title}" class="game-image">
+                <h3>${game.title}</h3>
+                <p>Приобретено: ${new Date(game.purchaseDate).toLocaleDateString()}</p>
+                <button class="btn btn-primary" onclick="downloadGame(${game.id})">Скачать</button>
+            </div>
+        `).join('');
+    }
+
+    function showAddBalanceModal() {
+        document.getElementById('addBalanceModal').style.display = 'block';
+    }
+
+    function addBalance() {
+        const amount = parseInt(document.getElementById('amount').value);
+        if (amount < 100) {
+            alert('Минимальная сумма пополнения - 100 ₽');
+            return;
+        }
+
+        const users = JSON.parse(localStorage.getItem('users'));
+        const userIndex = users.findIndex(u => u.id === currentUser.id);
+
+        if (userIndex !== -1) {
+            users[userIndex].balance += amount;
+            currentUser.balance += amount;
+
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+            document.getElementById('currentBalance').textContent = currentUser.balance;
+            closeModal('addBalanceModal');
+            alert(`Баланс пополнен на ${amount} ₽`);
+        }
+    }
+
+    function downloadGame(gameId) {
+        const game = (currentUser.library || []).find(g => g.id === gameId);
+        if (game) {
+            document.getElementById('downloadGameTitle').textContent = `Скачивание: ${game.title}`;
+            document.getElementById('downloadModal').style.display = 'block';
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Закрытие модального окна при клике вне его
+    window.onclick = function(event) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTheme();
+        updateAuthButtons();
+        loadUserProfile();
+    });
+
+    // Функции из common.html
+    function toggleTheme() { /* ... */ }
+    function loadTheme() { /* ... */ }
+    function updateAuthButtons() { /* ... */ }
+    function logout() { /* ... */ }
+</script>
+</body>
+</html>

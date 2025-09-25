@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - GameStore</title>
+    <style>
+        /* Все стили из login.html */
+        :root { /* ... */ }
+        .dark-theme { /* ... */ }
+        * { /* ... */ }
+        body { /* ... */ }
+        header { /* ... */ }
+        .header-content { /* ... */ }
+        .logo { /* ... */ }
+        .auth-buttons { /* ... */ }
+        .user-info { /* ... */ }
+        .balance { /* ... */ }
+        .btn { /* ... */ }
+        .btn-primary { /* ... */ }
+        .btn-secondary { /* ... */ }
+        .btn-small { /* ... */ }
+        main { /* ... */ }
+        footer { /* ... */ }
+        .footer-content { /* ... */ }
+        .theme-switcher { /* ... */ }
+        .form-container { /* ... */ }
+        .form-group { /* ... */ }
+        .auth-links { /* ... */ }
+        .error-message { /* ... */ }
+        .success-message { /* ... */ }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <a th:href="@{/home}" class="logo">GameStore</a>
+        <div class="auth-buttons">
+            <a th:href="@{/login}" class="btn btn-secondary">Войти</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="form-container">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Регистрация аккаунта</h2>
+
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <div class="form-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" th:field="*{username}" required minlength="3">
+                <div th:if="${#fields.hasErrors('username')}" class="error-message"
+                     style="font-size: 0.8rem; margin-top: 0.3rem;" th:errors="*{username}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" th:field="*{email}" required>
+                <div th:if="${#fields.hasErrors('email')}" class="error-message"
+                     style="font-size: 0.8rem; margin-top: 0.3rem;" th:errors="*{email}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" th:field="*{password}" required minlength="4">
+                <div th:if="${#fields.hasErrors('password')}" class="error-message"
+                     style="font-size: 0.8rem; margin-top: 0.3rem;" th:errors="*{password}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Подтвердите пароль:</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Зарегистрироваться</button>
+        </form>
+
+        <div class="auth-links">
+            <p>Уже есть аккаунт? <a th:href="@{/login}">Войти</a></p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+        <div class="theme-switcher" onclick="toggleTheme()">
+            <span id="themeText">Тёмная тема</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeText').textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
+    }
+
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.getElementById('themeText').textContent = 'Светлая тема';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTheme();
+
+        // Проверка совпадения паролей
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        function validatePassword() {
+            if (password.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Пароли не совпадают');
+            } else {
+                confirmPassword.setCustomValidity('');
+            }
+        }
+
+        password.onchange = validatePassword;
+        confirmPassword.onkeyup = validatePassword;
+    });
+</script>
+</body>
+</html>

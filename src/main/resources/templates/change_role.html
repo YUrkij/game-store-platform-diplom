@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Смена ролей - GameStore</title>
+  <style>
+    /* Все стили из common.html */
+    :root { /* ... */ }
+    .dark-theme { /* ... */ }
+    * { /* ... */ }
+    body { /* ... */ }
+    header { /* ... */ }
+    .header-content { /* ... */ }
+    .logo { /* ... */ }
+    .auth-buttons { /* ... */ }
+    .user-info { /* ... */ }
+    .balance { /* ... */ }
+    .btn { /* ... */ }
+    .btn-primary { /* ... */ }
+    .btn-secondary { /* ... */ }
+    .btn-small { /* ... */ }
+    main { /* ... */ }
+    footer { /* ... */ }
+    .footer-content { /* ... */ }
+    .theme-switcher { /* ... */ }
+    .form-container { /* ... */ }
+    .form-group { /* ... */ }
+
+    /* Дополнительные стили для change_role */
+    .user-info-card {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .role-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
+    .role-option {
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .role-option.selected {
+        border-color: var(--accent-primary);
+        background: rgba(108, 99, 255, 0.1);
+    }
+
+    .role-option h4 {
+        margin-bottom: 0.5rem;
+    }
+
+    .role-option p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <div class="logo">GameStore</div>
+    <div class="auth-buttons" id="authButtons"></div>
+  </div>
+</header>
+
+<main>
+  <div id="changeRoleContent">
+    <!-- Контент смены ролей -->
+  </div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+    <div class="theme-switcher" onclick="toggleTheme()">
+      <span id="themeText">Тёмная тема</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function loadChangeRolePage() {
+      // Проверяем права доступа
+      if (!currentUser || currentUser.role !== 'SUPERADMIN') {
+          document.getElementById('changeRoleContent').innerHTML = `
+              <h1>Доступ запрещен</h1>
+              <p>Только SUPERADMIN может изменять роли пользователей.</p>
+          `;
+          return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = parseInt(urlParams.get('id'));
+
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const targetUser = users.find(u => u.id === userId);
+
+      if (!targetUser) {
+          document.getElementById('changeRoleContent').innerHTML = '<h1>Пользователь не найден</h1>';
+          return;
+      }
+
+      if (targetUser.role === 'SUPERADMIN') {
+          document.getElementById('changeRoleContent').innerHTML = `
+              <h1>Невозможно изменить роль</h1>
+              <p>Нельзя изменять роль другого SUPERADMIN.</p>
+              <a href="admin_users.html" class="btn btn-secondary">Назад к списку</a>
+          `;
+          return;
+      }
+
+      document.getElementById('changeRoleContent').innerHTML = `
+          <h1>Изменение роли пользователя</h1>
+
+          <div class="user-info-card">
+              <h3>Пользователь: ${targetUser.username}</h3>
+              <p>Текущая роль: <strong>${targetUser.role}</strong></p>
+              <p>Email: ${targetUser.email}</p>
+          </div>
+
+          <div class="form-container">
+              <h3>Выберите новую роль</h3>
+
+              <div class="role-options">
+                  <div class="role-option ${targetUser.role === 'USER' ? 'selected' : ''}"
+                       onclick="selectRole('USER')">
+                      <h4>USER</h4>
+                      <p>Обычный пользователь</p>
+                      <p>Может покупать игры, оставлять комментарии</p>
+                  </div>
+
+                  <div class="role-option ${targetUser.role === 'ADMIN' ? 'selected' : ''}"
+                       onclick="selectRole('ADMIN')">
+                      <h4>ADMIN</h4>
+                      <p>Администратор</p>
+                      <p>Может управлять пользователями и играми</p>
+                  </div>
+              </div>
+
+              <input type="hidden" id="selectedRole" value="${targetUser.role}">
+
+              <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                  <button class="btn btn-primary" onclick="saveRole(${targetUser.id})">Сохранить изменения</button>
+                  <a href="user_profile.html?id=${targetUser.id}" class="btn btn-secondary">Отмена</a>
+              </div>
+          </div>
+      `;
+  }
+
+  function selectRole(role) {
+      document.getElementById('selectedRole').value = role;
+
+      // Обновляем визуальное выделение
+      document.querySelectorAll('.role-option').forEach(option => {
+          option.classList.remove('selected');
+      });
+
+      event.currentTarget.classList.add('selected');
+  }
+
+  function saveRole(userId) {
+      const newRole = document.getElementById('selectedRole').value;
+
+      const users = JSON.parse(localStorage.getItem('users'));
+      const userIndex = users.findIndex(u => u.id === userId);
+
+      if (userIndex !== -1) {
+          users[userIndex].role = newRole;
+          localStorage.setItem('users', JSON.stringify(users));
+
+          alert('Роль пользователя успешно изменена!');
+          window.location.href = `user_profile.html?id=${userId}`;
+      }
+  }
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      updateAuthButtons();
+      loadChangeRolePage();
+  });
+
+  // Функции из common.html
+  function toggleTheme() { /* ... */ }
+  function loadTheme() { /* ... */ }
+  function updateAuthButtons() { /* ... */ }
+  function logout() { /* ... */ }
+</script>
+</body>
+</html>

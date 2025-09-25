@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Игра - GameStore</title>
+  <style>
+    /* Все стили из common.html */
+    :root { /* ... */ }
+    .dark-theme { /* ... */ }
+    * { /* ... */ }
+    body { /* ... */ }
+    header { /* ... */ }
+    .header-content { /* ... */ }
+    .logo { /* ... */ }
+    .auth-buttons { /* ... */ }
+    .user-info { /* ... */ }
+    .balance { /* ... */ }
+    .btn { /* ... */ }
+    .btn-primary { /* ... */ }
+    .btn-secondary { /* ... */ }
+    .btn-small { /* ... */ }
+    main { /* ... */ }
+    footer { /* ... */ }
+    .footer-content { /* ... */ }
+    .theme-switcher { /* ... */ }
+    .comment { /* ... */ }
+    .comment.admin { /* ... */ }
+    .comment.superadmin { /* ... */ }
+
+    /* Дополнительные стили для game */
+    .game-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .game-image-large {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    .game-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .game-price {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--accent-primary);
+    }
+
+    .game-genres {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .genre-tag {
+        background: var(--accent-primary);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+    }
+
+    .comments-section {
+        margin-top: 3rem;
+    }
+
+    .comment-form {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .purchase-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-content">
+    <div class="logo">GameStore</div>
+    <div class="auth-buttons" id="authButtons"></div>
+  </div>
+</header>
+
+<main>
+  <div id="gameContent">
+    <!-- Контент игры будет загружен через JavaScript -->
+  </div>
+</main>
+
+<footer>
+  <div class="footer-content">
+    <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+    <div class="theme-switcher" onclick="toggleTheme()">
+      <span id="themeText">Тёмная тема</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function loadGamePage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = parseInt(urlParams.get('id'));
+
+      const games = [
+          {
+              id: 1,
+              title: "The Witcher 3: Wild Hunt",
+              price: 1999,
+              image: "https://via.placeholder.com/600x400/6c63ff/ffffff?text=Witcher+3",
+              genres: ["RPG", "Adventure"],
+              description: "Эпическая RPG в фэнтезийном мире",
+              fullDescription: "Величайшая RPG современности. Отправляйтесь в эпическое путешествие по миру, полному монстров, магии и интриг.",
+              developer: "CD Projekt Red",
+              publisher: "CD Projekt",
+              releaseDate: "2015-05-19"
+          }
+          // Добавьте другие игры по аналогии
+      ];
+
+      const game = games.find(g => g.id === gameId);
+      if (!game) {
+          document.getElementById('gameContent').innerHTML = '<h1>Игра не найдена</h1>';
+          return;
+      }
+
+      const isInLibrary = currentUser && currentUser.library &&
+                         currentUser.library.some(g => g.id === gameId);
+
+      document.getElementById('gameContent').innerHTML = `
+          <div class="game-header">
+              <div>
+                  <img src="${game.image}" alt="${game.title}" class="game-image-large">
+              </div>
+              <div class="game-info">
+                  <h1>${game.title}</h1>
+                  <div class="game-genres">
+                      ${game.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
+                  </div>
+                  <p>${game.fullDescription}</p>
+                  <div class="game-details">
+                      <p><strong>Разработчик:</strong> ${game.developer}</p>
+                      <p><strong>Издатель:</strong> ${game.publisher}</p>
+                      <p><strong>Дата выхода:</strong> ${new Date(game.releaseDate).toLocaleDateString()}</p>
+                  </div>
+                  <div class="game-price">${game.price} ₽</div>
+                  <div class="purchase-buttons">
+                      ${isInLibrary ?
+                          '<button class="btn btn-secondary" disabled>Уже в библиотеке</button>' :
+                          `<button class="btn btn-primary" onclick="buyGame(${game.id})">Купить</button>`
+                      }
+                  </div>
+              </div>
+          </div>
+
+          <div class="comments-section">
+              <h2>Отзывы</h2>
+              ${currentUser && !currentUser.isBanned && !isInLibrary ? `
+                  <div class="comment-form">
+                      <h3>Оставить комментарий</h3>
+                      <form id="commentForm">
+                          <div class="form-group">
+                              <textarea id="commentText" rows="4" placeholder="Ваш отзыв..." required></textarea>
+                          </div>
+                          <button type="submit" class="btn btn-primary">Отправить</button>
+                      </form>
+                  </div>
+              ` : ''}
+
+              <div class="comment-list" id="commentList">
+                  <!-- Комментарии будут здесь -->
+              </div>
+          </div>
+      `;
+
+      loadComments(gameId);
+      setupCommentForm(gameId);
+  }
+
+  function loadComments(gameId) {
+      const comments = [
+          {
+              id: 1,
+              userId: 2,
+              username: "user1",
+              role: "USER",
+              text: "Отличная игра! Провел за ней сотни часов.",
+              date: "2024-01-15"
+          }
+      ];
+
+      const commentList = document.getElementById('commentList');
+      if (commentList) {
+          commentList.innerHTML = comments.map(comment => `
+              <div class="comment ${comment.role.toLowerCase()}">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                      <strong>${comment.username}</strong>
+                      <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                          ${new Date(comment.date).toLocaleDateString()}
+                      </span>
+                  </div>
+                  <p>${comment.text}</p>
+              </div>
+          `).join('');
+      }
+  }
+
+  function setupCommentForm(gameId) {
+      const form = document.getElementById('commentForm');
+      if (form) {
+          form.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const text = document.getElementById('commentText').value;
+
+              if (currentUser.isBanned) {
+                  alert('Ваш аккаунт заблокирован! Вы не можете оставлять комментарии.');
+                  return;
+              }
+
+              // Здесь будет логика сохранения комментария
+              alert('Комментарий отправлен!');
+              document.getElementById('commentText').value = '';
+          });
+      }
+  }
+
+  function buyGame(gameId) {
+      if (!currentUser) {
+          window.location.href = 'login.html';
+          return;
+      }
+      window.location.href = `cart.html?gameId=${gameId}`;
+  }
+
+  // Инициализация
+  document.addEventListener('DOMContentLoaded', function() {
+      loadTheme();
+      updateAuthButtons();
+      loadGamePage();
+  });
+
+  // Функции из common.html
+  function toggleTheme() { /* ... */ }
+  function loadTheme() { /* ... */ }
+  function updateAuthButtons() { /* ... */ }
+  function logout() { /* ... */ }
+</script>
+</body>
+</html>

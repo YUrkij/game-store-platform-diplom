@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameStore Platform</title>
+    <style>
+        :root {
+            /* Светлая тема по умолчанию */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --accent-primary: #6c63ff;
+            --accent-secondary: #ff6b9d;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --neon-glow: none;
+        }
+
+        .dark-theme {
+            /* Тёмная тема */
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #ec4899;
+            --border-color: #2d3748;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --neon-glow: 0 0 10px var(--accent-primary), 0 0 20px var(--accent-primary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--bg-card);
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: var(--neon-glow);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .balance {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-small {
+            padding: 0.3rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Footer Styles */
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .theme-switcher {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--bg-secondary);
+        }
+
+        /* Game Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .game-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        /* Forms */
+        .form-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Comment Styles */
+        .comment {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--accent-primary);
+        }
+
+        .comment.admin {
+            border-left-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .comment.superadmin {
+            border-left-color: #ffd93d;
+            background: rgba(255, 217, 61, 0.1);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 10px;
+            min-width: 300px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <div class="logo">GameStore</div>
+        <div class="auth-buttons" id="authButtons">
+            <!-- Заполняется JavaScript -->
+        </div>
+    </div>
+</header>
+
+<main id="mainContent">
+    <!-- Контент страницы будет здесь -->
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
+        <div class="theme-switcher" onclick="toggleTheme()">
+            <span id="themeText">Тёмная тема</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Управление темой
+    function toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeText').textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
+    }
+
+    // Загрузка темы из localStorage
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            document.getElementById('themeText').textContent = 'Светлая тема';
+        }
+    }
+
+    // Базовая логика авторизации (заглушка)
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    const users = JSON.parse(localStorage.getItem('users')) || [
+        { id: 1, username: 'admin', password: 'admin', role: 'SUPERADMIN', balance: 1000, isBanned: false },
+        { id: 2, username: 'user1', password: '1', role: 'USER', balance: 500, isBanned: false }
+    ];
+
+    function updateAuthButtons() {
+        const authButtons = document.getElementById('authButtons');
+        if (currentUser) {
+            authButtons.innerHTML = `
+                <div class="user-info">
+                    <span>Добро пожаловать, ${currentUser.username}</span>
+                    <div class="balance">${currentUser.balance} ₽</div>
+                    <a href="user.html" class="btn btn-secondary btn-small">Кабинет</a>
+                    <button onclick="logout()" class="btn btn-secondary btn-small">Выйти</button>
+                </div>
+            `;
+        } else {
+            authButtons.innerHTML = `
+                <a href="login.html" class="btn btn-secondary">Войти</a>
+                <a href="register.html" class="btn btn-primary">Регистрация</a>
+            `;
+        }
+    }
+
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        updateAuthButtons();
+        window.location.href = 'home.html';
+    }
+
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTheme();
+        updateAuthButtons();
+        localStorage.setItem('users', JSON.stringify(users));
+    });
+</script>
+</body>
+</html>
