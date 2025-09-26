@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поиск пользователей - GameStore</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+        --primary-purple: #8a2be2;
+        --secondary-pink: #ff69b4;
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+        --text-light: #ffffff;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+        border-bottom: 3px solid var(--secondary-pink);
+        padding: 1rem 0;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+    }
+
+    .search-container {
+        background-color: var(--card-bg);
+        border: 2px solid var(--primary-purple);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem auto;
+        max-width: 800px;
+    }
+
+    .user-search-result {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--primary-purple);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(45deg, var(--primary-purple), var(--secondary-pink));
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="logo" th:href="@{/home}">GameStore</a>
+    <div class="navbar-nav ms-auto">
+      <a th:href="@{/user/profile}" class="btn btn-outline-light">Вернуться в профиль</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="search-container">
+    <h2>🔍 Поиск пользователей</h2>
+
+    <form th:action="@{/user/admin/search}" method="get" class="mb-4">
+      <div class="input-group">
+        <input type="text" name="query" class="form-control"
+               placeholder="Введите имя пользователя или email..."
+               th:value="${searchQuery}">
+        <button type="submit" class="btn btn-primary-custom">Найти</button>
+      </div>
+    </form>
+
+    <div th:if="${searchResults != null}">
+      <h5>Результаты поиска:</h5>
+      <div th:if="${not #lists.isEmpty(searchResults)}">
+        <div th:each="result : ${searchResults}" class="user-search-result">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong th:text="${result.username}"></strong>
+              <br>
+              <small class="text-muted" th:text="${result.email}"></small>
+              <br>
+              <span th:class="${'badge ' + (result.role == 'ADMIN' ? 'bg-primary' : result.role == 'SUPERADMIN' ? 'bg-warning' : 'bg-secondary')}"
+                    th:text="${result.role}"></span>
+              <span th:if="${result.banned}" class="badge bg-danger">Заблокирован</span>
+            </div>
+            <a th:href="@{/user/{userId}(userId=${result.id})}"
+               class="btn btn-sm btn-outline-primary">Перейти к профилю</a>
+          </div>
+        </div>
+      </div>
+      <div th:if="${#lists.isEmpty(searchResults)}" class="text-center text-muted">
+        Пользователи не найдены
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

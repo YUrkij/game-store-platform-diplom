@@ -1,245 +1,523 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет - GameStore</title>
+    <title th:text="${user.username} + ' - Профиль - GameStore'">Профиль - GameStore</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Все стили из common.html */
-        :root { /* ... */ }
-        .dark-theme { /* ... */ }
-        * { /* ... */ }
-        body { /* ... */ }
-        header { /* ... */ }
-        .header-content { /* ... */ }
-        .logo { /* ... */ }
-        .auth-buttons { /* ... */ }
-        .user-info { /* ... */ }
-        .balance { /* ... */ }
-        .btn { /* ... */ }
-        .btn-primary { /* ... */ }
-        .btn-secondary { /* ... */ }
-        .btn-small { /* ... */ }
-        main { /* ... */ }
-        footer { /* ... */ }
-        .footer-content { /* ... */ }
-        .theme-switcher { /* ... */ }
-        .games-grid { /* ... */ }
-        .game-card { /* ... */ }
-        .game-image { /* ... */ }
-        .modal { /* ... */ }
-        .modal-content { /* ... */ }
+        :root {
+            --primary-purple: #8a2be2;
+            --secondary-pink: #ff69b4;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-light: #ffffff;
+            --admin-blue: #007bff;
+            --superadmin-gold: #ffd700;
+            --banned-red: #dc3545;
+            --success-green: #28a745;
+        }
 
-        /* Дополнительные стили для user */
-        .user-profile {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+            border-bottom: 3px solid var(--secondary-pink);
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .user-info {
+            background: rgba(255, 105, 180, 0.1);
+            border-radius: 10px;
+            padding: 10px 15px;
+            border: 1px solid var(--secondary-pink);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+            margin-right: 15px;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 105, 180, 0.2);
+            transform: scale(1.05);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .profile-section {
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-purple);
+            border-radius: 15px;
+            padding: 2rem;
             margin-bottom: 2rem;
         }
 
-        .profile-card {
-            background: var(--bg-card);
-            padding: 2rem;
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .username {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-pink);
+            margin: 0;
+        }
+
+        .user-role-badge {
+            font-size: 1rem;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .role-user {
+            background: rgba(138, 43, 226, 0.3);
+            color: var(--secondary-pink);
+            border: 1px solid var(--primary-purple);
+        }
+
+        .role-admin {
+            background: rgba(0, 123, 255, 0.3);
+            color: var(--admin-blue);
+            border: 1px solid var(--admin-blue);
+        }
+
+        .role-superadmin {
+            background: rgba(255, 215, 0, 0.3);
+            color: var(--superadmin-gold);
+            border: 1px solid var(--superadmin-gold);
+            animation: superadmin-glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes superadmin-glow {
+            from {
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+            to {
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .banned-badge {
+            background: rgba(220, 53, 69, 0.3);
+            color: var(--banned-red);
+            border: 1px solid var(--banned-red);
+            padding: 10px 20px;
             border-radius: 10px;
-            box-shadow: var(--shadow);
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
         }
 
-        .profile-info h3 {
-            margin-bottom: 1rem;
-            color: var(--accent-primary);
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .library-section h2 {
+        .balance-amount {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .spent-amount {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-primary-custom {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .library-card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary-purple);
+            border-radius: 15px;
+            padding: 1.5rem;
             margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .library-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+        }
+
+        .game-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary-pink);
+            margin-bottom: 0.5rem;
+        }
+
+        .purchase-info {
+            color: #ccc;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-download {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
+        }
+
+        .admin-actions {
+            background-color: var(--card-bg);
+            border: 2px solid var(--admin-blue);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-ban {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-ban:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-unban {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .btn-unban:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
         }
 
         .empty-library {
             text-align: center;
+            color: #ccc;
+            font-style: italic;
             padding: 3rem;
-            color: var(--text-secondary);
+            border: 2px dashed var(--primary-purple);
+            border-radius: 15px;
         }
 
-        .balance-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .alert {
+            border-radius: 10px;
+            border: none;
             margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #d4edda;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #f8d7da;
+        }
+
+        .main-content {
+            flex: 1;
+        }
+
+        footer {
+            margin-top: auto;
         }
     </style>
 </head>
 <body>
-<header>
-    <div class="header-content">
-        <div class="logo">GameStore</div>
-        <div class="auth-buttons" id="authButtons"></div>
-    </div>
-</header>
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="logo" th:href="@{/home}">GameStore</a>
 
-<main>
-    <h1>Личный кабинет</h1>
+        <div class="navbar-nav ms-auto">
+            <div th:if="${currentUser != null}" class="user-section">
+                <a th:href="@{/user/profile}" class="user-info">
+                    <span th:text="${currentUser.username}"></span>
+                    <br>
+                    <small th:text="'Баланс: ' + ${#numbers.formatDecimal(currentUser.balance, 1, 2)} + ' ₽'"></small>
+                </a>
 
-    <div class="user-profile">
-        <div class="profile-card">
-            <h3>Информация о профиле</h3>
-            <div id="profileInfo">
-                <!-- Заполняется JavaScript -->
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
             </div>
-
-            <div class="balance-section">
-                <h3>Баланс: <span id="currentBalance">0</span> ₽</h3>
-                <button class="btn btn-primary" onclick="showAddBalanceModal()">Пополнить</button>
-            </div>
-        </div>
-
-        <div class="library-section">
-            <h2>Моя библиотека игр</h2>
-            <div id="userLibrary">
-                <!-- Библиотека будет здесь -->
+            <div th:unless="${currentUser != null}" class="user-section">
+                <a class="login-btn" th:href="@{/login}">Войти в аккаунт</a>
             </div>
         </div>
     </div>
-</main>
+</nav>
 
-<!-- Модальное окно пополнения баланса -->
-<div id="addBalanceModal" class="modal">
-    <div class="modal-content">
-        <h3>Пополнение баланса</h3>
-        <div class="form-group">
-            <label for="amount">Сумма пополнения (₽):</label>
-            <input type="number" id="amount" min="100" max="10000" value="500">
+<!-- Main Content -->
+<div class="container mt-4 main-content">
+    <!-- Уведомления -->
+    <div th:if="${success}" class="alert alert-success" role="alert">
+        <span th:text="${success}">Успех!</span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" role="alert">
+        <span th:text="${error}">Ошибка!</span>
+    </div>
+
+    <!-- Баннер для забаненного пользователя -->
+    <div th:if="${user.banned}" class="banned-badge">
+        ⚠ Ваш аккаунт заблокирован. Вы не можете совершать покупки и оставлять комментарии.
+    </div>
+
+    <!-- Информация о пользователе -->
+    <div class="profile-section">
+        <div class="profile-header">
+            <h1 class="username" th:text="${user.username}">Имя пользователя</h1>
+            <span th:class="${'user-role-badge role-' + user.role.toLowerCase()}"
+                  th:text="${user.role}">Роль</span>
         </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-            <button class="btn btn-primary" onclick="addBalance()">Пополнить</button>
-            <button class="btn btn-secondary" onclick="closeModal('addBalanceModal')">Отмена</button>
+
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Email:</strong> <span th:text="${user.email}">email@example.com</span></p>
+                <p><strong>Дата регистрации:</strong> <span th:text="${#temporals.format(user.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2024</span></p>
+                <p><strong>Статус:</strong>
+                    <span th:if="${user.banned}" class="text-danger">Заблокирован</span>
+                    <span th:unless="${user.banned}" class="text-success">Активен</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Админские действия (только для админов и суперадминов, просматривающих чужой профиль) -->
+    <div th:if="${currentUser != null and currentUser.id != user.id and (currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN')}"
+         class="admin-actions">
+        <h4>Административные действия</h4>
+
+        <!-- Проверка прав доступа -->
+        <div th:if="${(currentUser.role == 'ADMIN' and user.role != 'SUPERADMIN') or currentUser.role == 'SUPERADMIN'}">
+            <form th:if="${user.banned}" th:action="@{/admin/users/{id}/unban(id=${user.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn-unban">Разблокировать пользователя</button>
+            </form>
+
+            <form th:unless="${user.banned}" th:action="@{/admin/users/{id}/ban(id=${user.id})}" method="post" style="display: inline;">
+                <button type="submit" class="btn-ban"
+                        onclick="return confirm('Вы уверены, что хотите заблокировать пользователя?')">
+                    Заблокировать пользователя
+                </button>
+            </form>
+        </div>
+
+
+
+        <div th:if="${currentUser.role == 'ADMIN' and user.role == 'SUPERADMIN'}" class="text-warning">
+            Вы не можете блокировать суперадминистраторов
+        </div>
+    </div>
+    <!-- Админские вкладки (только для админов и суперадминов в своем профиле) -->
+    <div th:if="${currentUser != null and currentUser.id == user.id and (currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN')}"
+         class="profile-section">
+        <h3>Панель администратора</h3>
+
+        <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+            <!-- Вкладка поиска пользователей (для всех админов) -->
+            <li class="nav-item" th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN'}">
+                <a class="nav-link active" id="search-tab" data-bs-toggle="tab" href="#search" role="tab">
+                    Поиск пользователей
+                </a>
+            </li>
+
+            <!-- Вкладка создания игр (только для суперадминов) -->
+            <li class="nav-item" th:if="${currentUser.role == 'SUPERADMIN'}">
+                <a class="nav-link" id="create-game-tab" data-bs-toggle="tab" href="#create-game" role="tab">
+                    🎮 Создание игры
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="adminTabsContent">
+            <!-- Вкладка поиска пользователей -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel">
+                <div class="admin-search-section">
+                    <form th:action="@{/user/admin/search}" method="get" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="query" class="form-control"
+                                   placeholder="Введите имя пользователя или email..."
+                                   th:value="${searchQuery}">
+                            <button type="submit" class="btn btn-primary-custom">Найти</button>
+                        </div>
+                    </form>
+
+                    <div th:if="${searchResults != null}">
+                        <h5>Результаты поиска:</h5>
+                        <div th:if="${not #lists.isEmpty(searchResults)}">
+                            <div th:each="result : ${searchResults}" class="user-search-result">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong th:text="${result.username}"></strong>
+                                        <br>
+                                        <small class="text-muted" th:text="${result.email}"></small>
+                                        <br>
+                                        <span th:class="${'badge ' + (result.role == 'ADMIN' ? 'bg-primary' : result.role == 'SUPERADMIN' ? 'bg-warning' : 'bg-secondary')}"
+                                              th:text="${result.role}"></span>
+                                        <span th:if="${result.banned}" class="badge bg-danger">Заблокирован</span>
+                                    </div>
+                                    <a th:href="@{/user/{userId}(userId=${result.id})}"
+                                       class="btn btn-sm btn-outline-primary">Перейти к профилю</a>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(searchResults)}" class="text-center text-muted">
+                            Пользователи не найдены
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка создания игр (только для суперадминов) -->
+            <div class="tab-pane fade" id="create-game" role="tabpanel" th:if="${currentUser.role == 'SUPERADMIN'}">
+                <div class="create-game-section">
+                    <p>Для создания новой игры перейдите на страницу создания:</p>
+                    <a th:href="@{/user/superadmin/create-game}" class="btn btn-primary-custom">
+                         Перейти к созданию игры
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Баланс и траты -->
+    <div class="balance-card">
+        <h3>Баланс и финансы</h3>
+        <div class="balance-amount" th:text="${#numbers.formatDecimal(user.balance, 1, 2)} + ' ₽'">0 ₽</div>
+        <div class="spent-amount">
+            Всего потрачено: <span th:text="${#numbers.formatDecimal(totalSpent, 1, 2)} + ' ₽'">0 ₽</span>
+        </div>
+
+        <!-- Кнопка пополнения (только для своего профиля и незабаненного) -->
+        <div th:if="${currentUser != null and currentUser.id == user.id and not user.banned}">
+            <a th:href="@{/user/balance}" class="btn btn-primary-custom">Пополнить баланс</a>
+        </div>
+
+        <div th:if="${currentUser != null and currentUser.id == user.id and user.banned}" class="text-warning">
+            Заблокированные пользователи не могут пополнять баланс
+        </div>
+    </div>
+
+    <!-- Библиотека игр -->
+    <div class="profile-section">
+        <h3>Моя библиотека игр</h3>
+
+        <div th:if="${libraryItems != null and not #lists.isEmpty(libraryItems)}">
+            <div th:each="item : ${libraryItems}" class="library-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="game-title" th:text="${item.game.title}">Название игры</div>
+                        <div class="purchase-info">
+                            Куплено: <span th:text="${#temporals.format(item.purchaseDate, 'dd.MM.yyyy')}">01.01.2024</span>
+                            за <span th:text="${#numbers.formatDecimal(item.purchasePrice, 1, 2)} + ' ₽'">0 ₽</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-download">Скачать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${libraryItems == null or #lists.isEmpty(libraryItems)}" class="empty-library">
+            <h4>Библиотека пуста</h4>
+            <p>У вас пока нет купленных игр. Посетите каталог, чтобы найти интересные игры!</p>
+            <a th:href="@{/home}" class="btn btn-primary-custom">Перейти в каталог</a>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно скачивания -->
-<div id="downloadModal" class="modal">
-    <div class="modal-content">
-        <h3>Скачивание игры</h3>
-        <p id="downloadGameTitle">Игра будет скачана в ближайшее время...</p>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Это демонстрационная версия. В реальном приложении здесь была бы ссылка на скачивание.
-        </p>
-        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="closeModal('downloadModal')">Закрыть</button>
-    </div>
-</div>
-
-<footer>
-    <div class="footer-content">
-        <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
-        <div class="theme-switcher" onclick="toggleTheme()">
-            <span id="themeText">Тёмная тема</span>
-        </div>
+<footer class="bg-dark text-light text-center py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2024 GameStore. Все права защищены.</p>
     </div>
 </footer>
 
-<script>
-    function loadUserProfile() {
-        if (!currentUser) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        document.getElementById('profileInfo').innerHTML = `
-            <p><strong>Имя пользователя:</strong> ${currentUser.username}</p>
-            <p><strong>Email:</strong> ${currentUser.email}</p>
-            <p><strong>Роль:</strong> ${currentUser.role}</p>
-            <p><strong>Статус:</strong> ${currentUser.isBanned ? 'Заблокирован' : 'Активен'}</p>
-        `;
-
-        document.getElementById('currentBalance').textContent = currentUser.balance;
-        renderUserLibrary();
-    }
-
-    function renderUserLibrary() {
-        const libraryContainer = document.getElementById('userLibrary');
-        const userGames = currentUser.library || [];
-
-        if (userGames.length === 0) {
-            libraryContainer.innerHTML = `
-                <div class="empty-library">
-                    <h3>Ваша библиотека пуста</h3>
-                    <p>Приобретите игры в <a href="home.html">магазине</a></p>
-                </div>
-            `;
-            return;
-        }
-
-        libraryContainer.innerHTML = userGames.map(game => `
-            <div class="game-card">
-                <img src="${game.image}" alt="${game.title}" class="game-image">
-                <h3>${game.title}</h3>
-                <p>Приобретено: ${new Date(game.purchaseDate).toLocaleDateString()}</p>
-                <button class="btn btn-primary" onclick="downloadGame(${game.id})">Скачать</button>
-            </div>
-        `).join('');
-    }
-
-    function showAddBalanceModal() {
-        document.getElementById('addBalanceModal').style.display = 'block';
-    }
-
-    function addBalance() {
-        const amount = parseInt(document.getElementById('amount').value);
-        if (amount < 100) {
-            alert('Минимальная сумма пополнения - 100 ₽');
-            return;
-        }
-
-        const users = JSON.parse(localStorage.getItem('users'));
-        const userIndex = users.findIndex(u => u.id === currentUser.id);
-
-        if (userIndex !== -1) {
-            users[userIndex].balance += amount;
-            currentUser.balance += amount;
-
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-            document.getElementById('currentBalance').textContent = currentUser.balance;
-            closeModal('addBalanceModal');
-            alert(`Баланс пополнен на ${amount} ₽`);
-        }
-    }
-
-    function downloadGame(gameId) {
-        const game = (currentUser.library || []).find(g => g.id === gameId);
-        if (game) {
-            document.getElementById('downloadGameTitle').textContent = `Скачивание: ${game.title}`;
-            document.getElementById('downloadModal').style.display = 'block';
-        }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    // Закрытие модального окна при клике вне его
-    window.onclick = function(event) {
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            if (event.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    }
-
-    // Инициализация
-    document.addEventListener('DOMContentLoaded', function() {
-        loadTheme();
-        updateAuthButtons();
-        loadUserProfile();
-    });
-
-    // Функции из common.html
-    function toggleTheme() { /* ... */ }
-    function loadTheme() { /* ... */ }
-    function updateAuthButtons() { /* ... */ }
-    function logout() { /* ... */ }
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

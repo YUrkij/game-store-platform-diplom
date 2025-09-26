@@ -2,24 +2,366 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GameStore - Главная</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { font-family: Arial; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        :root {
+            --primary-purple: #8a2be2;
+            --secondary-pink: #ff69b4;
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-light: #ffffff;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+            border-bottom: 3px solid var(--secondary-pink);
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .user-info {
+            background: rgba(255, 105, 180, 0.1);
+            border-radius: 10px;
+            padding: 10px 15px;
+            border: 1px solid var(--secondary-pink);
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 105, 180, 0.2);
+            transform: scale(1.05);
+            text-decoration: none;
+            color: inherit;
+        }
+
+    .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 8px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: scale(1.05);
+    }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--primary-purple);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+            height: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.3);
+        }
+
+        .game-header {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-pink));
+            color: white;
+            padding: 1.5rem;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .btn-buy {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-pink));
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-buy:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-details {
+            background: transparent;
+            border: 2px solid var(--primary-purple);
+            color: var(--primary-purple);
+            transition: all 0.3s ease;
+        }
+
+        .btn-details:hover {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .genre-badge {
+            background: rgba(138, 43, 226, 0.2);
+            color: var(--secondary-pink);
+            border: 1px solid var(--primary-purple);
+            margin: 2px;
+        }
+
+        .filter-section {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--primary-purple);
+        }
+
+        .dropdown-menu {
+            background-color: var(--card-bg);
+            border: 1px solid var(--primary-purple);
+        }
+
+        .dropdown-item {
+            color: var(--text-light);
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .price-tag {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--secondary-pink);
+        }
+
+        .developer-info {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .in-library-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .btn-buy.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🎮 GameStore работает! 🎮</h1>
-    <p>Сервер запущен успешно!</p>
-    <p><a href="/login">Войти</a> | <a href="/register">Регистрация</a></p>
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <!-- Логотип/название сайта -->
+        <a class="logo" th:href="@{/home}">GameStore</a>
 
-    <h2>Тестовые данные:</h2>
-    <div th:each="game : ${games}">
-        <h3 th:text="${game.title}">Game</h3>
-        <p th:text="${game.description}">Description</p>
-        <p th:text="'Цена: ' + ${game.price} + ' ₽'">Price</p>
+        <!-- Информация о пользователе -->
+        <div class="navbar-nav ms-auto">
+            <div th:if="${currentUser}" class="user-section">
+                <!-- Ссылка на профиль пользователя -->
+                <a th:href="@{/user/profile}" class="user-info">
+                    <span th:text="${currentUser.username}"></span>
+                    <br>
+                    <small th:text="'Баланс: ' + ${#numbers.formatDecimal(currentUser.balance, 1, 2)} + ' ₽'"></small>
+                </a>
+
+                <!-- Кнопка выхода -->
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="logout-btn">Выйти</button>
+                </form>
+            </div>
+            <div th:unless="${currentUser}">
+                <a class="nav-link btn btn-outline-light" th:href="@{/login}">Войти в аккаунт</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4">
+    <!-- Фильтры и поиск -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="dropdown">
+                    <button class="btn btn-buy dropdown-toggle" type="button" id="genreDropdown" data-bs-toggle="dropdown">
+                        Выбрать жанры
+                    </button>
+                    <ul class="dropdown-menu">
+                        <!-- Динамические жанры из базы данных -->
+                        <li><a class="dropdown-item" th:href="@{/home}">Все жанры</a></li>
+                        <li th:each="genre : ${allGenres}">
+                            <a class="dropdown-item" th:href="@{/home(genre=${genre})}" th:text="${genre}">Жанр</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form th:action="@{/home}" method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Поиск игр..."
+                           th:value="${param.search}">
+                    <button type="submit" class="btn btn-buy">Найти</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Каталог игр -->
+    <div class="row" id="gamesCatalog">
+        <div th:each="game : ${games}" class="col-lg-4 col-md-6 mb-4">
+            <div class="game-card">
+                <div class="game-header">
+                    <h5 class="game-title" th:text="${game.title}">Название игры</h5>
+                </div>
+
+                <div class="card-body">
+                    <p class="text-muted" th:text="${game.description} ?: 'Описание отсутствует'">
+                        Краткое описание игры
+                    </p>
+
+                    <!-- Жанры -->
+                    <div class="mb-3">
+                            <span th:each="genre : ${game.genres}"
+                                  class="badge genre-badge"
+                                  th:text="${genre}">Жанр</span>
+                    </div>
+
+                    <!-- Информация о разработчике и дате -->
+                    <div class="developer-info mb-3">
+                        <div th:if="${game.developer}">
+                            <strong>Разработчик:</strong> <span th:text="${game.developer}"></span>
+                        </div>
+                        <div th:if="${game.releaseDate}">
+                            <strong>Дата выхода:</strong> <span th:text="${#temporals.format(game.releaseDate, 'dd.MM.yyyy')}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Цена и кнопки -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="price-tag" th:text="${#numbers.formatDecimal(game.price, 1, 2)} + ' ₽'">0 ₽</span>
+                    </div>
+
+                    <!-- Кнопки действий -->
+                    <div class="d-grid gap-2">
+                        <!-- Кнопка покупки -->
+                        <div th:if="${currentUser}">
+                            <div th:if="${gameInLibraryMap != null and gameInLibraryMap.get(game.id)}">
+                                <div class="in-library-badge w-100">
+                                    ✓ В библиотеке
+                                </div>
+                            </div>
+                            <div th:unless="${gameInLibraryMap != null and gameInLibraryMap.get(game.id)}">
+                                <a th:href="@{/purchase/game/{id}(id=${game.id})}"
+                                   class="btn btn-buy w-100"
+                                   th:classappend="${currentUser.balance.compareTo(game.price) < 0} ? 'disabled' : ''">
+                <span th:if="${currentUser.balance.compareTo(game.price) >= 0}">
+                    Купить
+                </span>
+                                    <span th:if="${currentUser.balance.compareTo(game.price) < 0}">
+                    Недостаточно средств
+                </span>
+                                </a>
+                                <small th:if="${currentUser.balance.compareTo(game.price) < 0}"
+                                       class="text-warning mt-1 d-block">
+                                    Не хватает: <span th:text="${#numbers.formatDecimal(game.price.subtract(currentUser.balance), 1, 2)} + ' ₽'"></span>
+                                </small>
+                            </div>
+                        </div>
+                        <a th:unless="${currentUser}"
+                           th:href="@{/login}"
+                           class="btn btn-buy w-100">
+                            Войти для покупки
+                        </a>
+
+                        <!-- Кнопка подробнее -->
+                        <a th:href="@{/game/{id}(id=${game.id})}"
+                           class="btn btn-details w-100">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Сообщение если игры не найдены -->
+        <div th:if="${#lists.isEmpty(games)}" class="col-12 text-center">
+            <div class="alert alert-info">
+                <h4>Игры не найдены</h4>
+                <p>Попробуйте изменить параметры поиска или выберите другой жанр</p>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light text-center py-4 mt-5">
+    <div class="container">
+        <p>&copy; 2024 GameStore. Все права защищены.</p>
+    </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Функция для покупки игры
+    function purchaseGame(gameId) {
+        // Прямой переход на страницу покупки игры
+        window.location.href = '/games/' + gameId + '/purchase';
+    }
+
+    // Обработка нажатия Enter в поле поиска
+    document.querySelector('input[name="search"]')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            this.form.submit();
+        }
+    });
+</script>
 </body>
 </html>

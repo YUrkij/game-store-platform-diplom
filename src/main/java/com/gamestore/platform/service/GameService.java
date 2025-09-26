@@ -82,7 +82,6 @@ public class GameService {
         game.setTitle(gameDTO.getTitle());
         game.setDescription(gameDTO.getDescription());
         game.setPrice(gameDTO.getPrice());
-        // ... остальные поля
 
         Game updatedGame = gameRepository.save(game);
         return convertToDTO(updatedGame);
@@ -110,5 +109,11 @@ public class GameService {
         }
 
         return dto;
+    }
+
+    public List<String> getAllGenres() {
+        return genreRepository.findAll().stream()
+                .map(Genre::getName)
+                .collect(Collectors.toList());
     }
 }

@@ -28,7 +28,7 @@ public class SecurityConfig {
                         // Статические ресурсы - разрешаем всем
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         // Публичные страницы - разрешаем всем
-                        .requestMatchers("/", "/home", "/index", "/login", "/register", "/error").permitAll()
+                        .requestMatchers("/", "/home", "/index", "/login", "/register", "/error", "/game/**").permitAll()
                         // Защищенные страницы - требуют авторизации
                         .requestMatchers("/user/**", "/cart/**").hasAnyRole("USER", "ADMIN", "SUPERADMIN")
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPERADMIN")

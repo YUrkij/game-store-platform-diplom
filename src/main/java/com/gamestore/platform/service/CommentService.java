@@ -33,6 +33,12 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    public CommentDTO getCommentByUserAndGame(Long userId, Long gameId) {
+        return commentRepository.findByGameIdAndUserId(gameId, userId)
+                .map(this::convertToDTO)
+                .orElse(null);
+    }
+
     public CommentDTO addComment(CommentDTO commentDTO) {
         User user = userRepository.findById(commentDTO.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
@@ -58,8 +64,30 @@ public class CommentService {
         return convertToDTO(savedComment);
     }
 
-    public void deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
+    public CommentDTO updateComment(Long commentId, Long userId, String newText) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Комментарий не найден"));
+
+        // Проверяем, что пользователь является автором комментария
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Вы можете редактировать только свои комментарии");
+        }
+
+        comment.setCommentText(newText);
+        Comment updatedComment = commentRepository.save(comment);
+        return convertToDTO(updatedComment);
+    }
+
+    public void deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Комментарий не найден"));
+
+        // Проверяем, что пользователь является автором комментария
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("Вы можете удалять только свои комментарии");
+        }
+
+        commentRepository.delete(comment);
     }
 
     public void deleteCommentsByUserId(Long userId) {

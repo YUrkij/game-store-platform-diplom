@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Покупка игры - GameStore</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+        --primary-purple: #8a2be2;
+        --secondary-pink: #ff69b4;
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+        --text-light: #ffffff;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+        border-bottom: 3px solid var(--secondary-pink);
+        padding: 1rem 0;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo:hover {
+        transform: scale(1.05);
+        color: white;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .purchase-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .purchase-card {
+        background-color: var(--card-bg);
+        border: 2px solid var(--primary-purple);
+        border-radius: 15px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 10px 30px rgba(138, 43, 226, 0.3);
+    }
+
+    .purchase-title {
+        text-align: center;
+        color: var(--secondary-pink);
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+
+    .game-info {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary-purple);
+    }
+
+    .game-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--secondary-pink);
+        margin-bottom: 1rem;
+    }
+
+    .balance-info {
+        background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .balance-amount {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+
+    .price-info {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid gold;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .game-price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: gold;
+        margin: 0.5rem 0;
+    }
+
+    .btn-purchase {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .btn-purchase:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-purchase:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btn-back {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+
+    .btn-back:hover {
+        background: rgba(255, 255, 255, 0.2);
+        text-decoration: none;
+        color: white;
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+        margin-bottom: 1rem;
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        color: #f8d7da;
+    }
+
+    .insufficient-funds {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .funds-difference {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #ff6b6b;
+    }
+     .game-details {
+        font-size: 0.9rem;
+        color: #ccc;
+    }
+
+    .detail-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .genre-badge {
+        display: inline-block;
+        background: rgba(138, 43, 226, 0.3);
+        color: var(--secondary-pink);
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin: 2px;
+        font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="logo" th:href="@{/home}">GameStore</a>
+
+    <div class="navbar-nav ms-auto">
+      <div th:if="${currentUser != null}" class="user-section">
+        <a th:href="@{/user/profile}" class="user-info">
+          <span th:text="${currentUser.username}"></span>
+          <br>
+          <small th:text="'Баланс: ' + ${#numbers.formatDecimal(currentUser.balance, 1, 2)} + ' ₽'"></small>
+        </a>
+
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+          <button type="submit" class="logout-btn">Выйти</button>
+        </form>
+      </div>
+      <div th:unless="${currentUser != null}" class="user-section">
+        <a class="login-btn" th:href="@{/login}">Войти в аккаунт</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Purchase Section -->
+<div class="purchase-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="purchase-card">
+          <h2 class="purchase-title">Подтверждение покупки</h2>
+
+          <div th:if="${error}" class="alert alert-danger" role="alert">
+            <span th:text="${error}">Ошибка!</span>
+          </div>
+
+          <!-- Информация об игре -->
+          <div class="game-info">
+            <div class="game-title" th:text="${game.title}">Название игры</div>
+            <p class="text-muted" th:text="${game.description} ?: 'Вы приобретаете доступ к этой игре навсегда. После покупки игра появится в вашей библиотеке.'">
+              Вы приобретаете доступ к этой игре навсегда. После покупки игра появится в вашей библиотеке.
+            </p>
+
+            <!-- Дополнительная информация об игре -->
+            <div class="game-details mt-3">
+              <div th:if="${game.developer}" class="detail-item">
+                <strong>Разработчик:</strong> <span th:text="${game.developer}"></span>
+              </div>
+              <div th:if="${game.releaseDate}" class="detail-item">
+                <strong>Дата выхода:</strong> <span th:text="${#temporals.format(game.releaseDate, 'dd.MM.yyyy')}"></span>
+              </div>
+              <div th:if="${game.genres != null and not game.genres.empty}" class="detail-item">
+                <strong>Жанры:</strong>
+                <span th:each="genre : ${game.genres}" class="genre-badge" th:text="${genre}"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Информация о балансе -->
+          <div class="balance-info">
+            <div>Ваш текущий баланс:</div>
+            <div class="balance-amount" th:text="${#numbers.formatDecimal(currentUser.balance, 1, 2)} + ' ₽'">0 ₽</div>
+          </div>
+
+          <!-- Информация о цене -->
+          <div class="price-info">
+            <div>Стоимость игры:</div>
+            <div class="game-price" th:text="${game != null ? #numbers.formatDecimal(game.price, 1, 2) + ' ₽' : 'Загрузка...'}">
+              Загрузка...
+            </div>
+          </div>
+
+          <!-- Проверка достаточности средств -->
+          <div th:if="${game != null and currentUser.balance.compareTo(game.price) < 0}"
+               class="insufficient-funds">
+            <div>Недостаточно средств для покупки</div>
+            <div class="funds-difference">
+              Не хватает: <span th:text="${#numbers.formatDecimal(game.price.subtract(currentUser.balance), 1, 2)} + ' ₽'"></span>
+            </div>
+          </div>
+
+          <!-- Форма покупки -->
+          <form th:action="@{/purchase/game/{gameId}(gameId=${gameId})}" method="post">
+            <button type="submit"
+                    class="btn btn-purchase"
+                    th:disabled="${game != null and currentUser.balance.compareTo(game.price) < 0}">
+              <span th:if="${game == null}">Загрузка...</span>
+              <span th:if="${game != null and currentUser.balance.compareTo(game.price) >= 0}">
+                                    Подтвердить покупку
+                                </span>
+              <span th:if="${game != null and currentUser.balance.compareTo(game.price) < 0}">
+                                    Недостаточно средств
+                                </span>
+            </button>
+          </form>
+
+          <a th:href="@{/game/{gameId}(gameId=${gameId})}" class="btn btn-back">
+            ← Вернуться к игре
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-light text-center py-4">
+  <div class="container">
+    <p>&copy; 2024 GameStore. Все права защищены.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Скрипт для загрузки информации об игре -->
+<script>
+  // Загружаем информацию об игре через AJAX
+  document.addEventListener('DOMContentLoaded', function() {
+      const gameId = /*[[${gameId}]]*/ null;
+      if (gameId) {
+          fetch('/api/games/' + gameId)
+              .then(response => response.json())
+              .then(game => {
+                  // Обновляем информацию на странице
+                  const gameTitle = document.querySelector('.game-title');
+                  const gamePrice = document.querySelector('.game-price');
+
+                  if (gameTitle && gamePrice) {
+                      gameTitle.textContent = game.title;
+                      gamePrice.textContent = game.price.toFixed(2) + ' ₽';
+
+                      // Обновляем состояние кнопки
+                      const purchaseButton = document.querySelector('.btn-purchase');
+                      const currentBalance = /*[[${currentUser.balance}]]*/ 0;
+
+                      if (currentBalance < game.price) {
+                          purchaseButton.disabled = true;
+                          purchaseButton.innerHTML = 'Недостаточно средств';
+                      } else {
+                          purchaseButton.disabled = false;
+                          purchaseButton.innerHTML = 'Подтвердить покупку';
+                      }
+                  }
+              })
+              .catch(error => {
+                  console.error('Ошибка загрузки информации об игре:', error);
+              });
+      }
+  });
+</script>
+</body>
+</html>

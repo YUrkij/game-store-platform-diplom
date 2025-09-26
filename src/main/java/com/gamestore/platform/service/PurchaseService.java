@@ -10,6 +10,7 @@ import com.gamestore.platform.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -24,6 +25,16 @@ public class PurchaseService {
         this.libraryItemRepository = libraryItemRepository;
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
+    }
+
+
+
+    public List<LibraryItem> getUserLibrary(Long userId) {
+        return libraryItemRepository.findByUserIdWithGames(userId);
+    }
+
+    public boolean hasGameInLibrary(Long userId, Long gameId) {
+        return libraryItemRepository.existsById_UserIdAndId_GameId(userId, gameId);
     }
 
     public LibraryItem purchaseGame(Long userId, Long gameId) {
@@ -56,15 +67,15 @@ public class PurchaseService {
         LibraryItem libraryItem = new LibraryItem();
         libraryItem.setId(pk);
         libraryItem.setPurchasePrice(game.getPrice());
+        libraryItem.setUser(user);
+        libraryItem.setGame(game);
 
         return libraryItemRepository.save(libraryItem);
     }
 
-    public List<LibraryItem> getUserLibrary(Long userId) {
-        return libraryItemRepository.findByUserIdWithGames(userId);
-    }
-
-    public boolean hasGameInLibrary(Long userId, Long gameId) {
-        return libraryItemRepository.existsById_UserIdAndId_GameId(userId, gameId);
+    public BigDecimal getGamePrice(Long gameId) {
+        return gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Игра не найдена"))
+                .getPrice();
     }
 }

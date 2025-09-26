@@ -25,4 +25,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
         return findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
+
+    // Метод поиска пользователей по имени или email (без учета регистра)
+    @Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<User> findByUsernameOrEmale(@Param("query") String query);
+
 }
+/*
+   USER:     testuser / password123
+   ADMIN:    admin / admin123
+   SUPERADMIN: superadmin / super123
+* */

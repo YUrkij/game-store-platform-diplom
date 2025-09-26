@@ -1,266 +1,683 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Игра - GameStore</title>
+  <title th:text="${game.title} + ' - GameStore'">Игра - GameStore</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    /* Все стили из common.html */
-    :root { /* ... */ }
-    .dark-theme { /* ... */ }
-    * { /* ... */ }
-    body { /* ... */ }
-    header { /* ... */ }
-    .header-content { /* ... */ }
-    .logo { /* ... */ }
-    .auth-buttons { /* ... */ }
-    .user-info { /* ... */ }
-    .balance { /* ... */ }
-    .btn { /* ... */ }
-    .btn-primary { /* ... */ }
-    .btn-secondary { /* ... */ }
-    .btn-small { /* ... */ }
-    main { /* ... */ }
-    footer { /* ... */ }
-    .footer-content { /* ... */ }
-    .theme-switcher { /* ... */ }
-    .comment { /* ... */ }
-    .comment.admin { /* ... */ }
-    .comment.superadmin { /* ... */ }
-
-    /* Дополнительные стили для game */
-    .game-header {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
+    :root {
+        --primary-purple: #8a2be2;
+        --secondary-pink: #ff69b4;
+        --dark-bg: #121212;
+        --card-bg: #1e1e1e;
+        --text-light: #ffffff;
+        --admin-blue: #007bff;
+        --superadmin-gold: #ffd700;
     }
 
-    .game-image-large {
-        width: 100%;
-        border-radius: 10px;
-    }
-
-    .game-info {
+    body {
+        background-color: var(--dark-bg);
+        color: var(--text-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+    }
+
+    .navbar {
+        background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+        border-bottom: 3px solid var(--secondary-pink);
+        padding: 1rem 0;
+    }
+
+    .logo {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        text-decoration: none;
+        transition: transform 0.3s ease;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .logo:hover {
+        transform: scale(1.05);
+        color: white;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .user-info {
+        background: rgba(255, 105, 180, 0.1);
+        border-radius: 10px;
+        padding: 10px 15px;
+        border: 1px solid var(--secondary-pink);
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+        margin-right: 15px;
+    }
+
+    .user-info:hover {
+        background: rgba(255, 105, 180, 0.2);
+        transform: scale(1.05);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 8px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    .login-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        border-radius: 8px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .login-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        transform: scale(1.05);
+        text-decoration: none;
+    }
+
+    .game-header {
+        background: linear-gradient(135deg, var(--primary-purple), var(--secondary-pink));
+        color: white;
+        padding: 3rem 0;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+
+    .game-title {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .game-info-card {
+        background-color: var(--card-bg);
+        border: 2px solid var(--primary-purple);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
     }
 
     .game-price {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: bold;
-        color: var(--accent-primary);
+        color: var(--secondary-pink);
+        text-align: center;
+        margin: 1rem 0;
     }
 
-    .game-genres {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .genre-tag {
-        background: var(--accent-primary);
+    .btn-buy {
+        background: linear-gradient(45deg, var(--primary-purple), var(--secondary-pink));
+        border: none;
         color: white;
-        padding: 0.3rem 0.8rem;
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .btn-buy:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+    }
+
+    .btn-buy:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .btn-edit {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
+    }
+
+    .genre-badge {
+        background: rgba(138, 43, 226, 0.3);
+        color: var(--secondary-pink);
+        border: 1px solid var(--primary-purple);
+        margin: 5px;
+        padding: 8px 15px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .genre-badge:hover {
+        background: rgba(138, 43, 226, 0.5);
+        transform: scale(1.1);
+        text-decoration: none;
+        color: white;
+    }
+
+    .comment-section {
+        background-color: var(--card-bg);
+        border: 2px solid var(--primary-purple);
         border-radius: 15px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .comment-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--primary-purple);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    /* Стиль для комментариев админов */
+    .comment-admin {
+        border-left: 4px solid var(--admin-blue);
+        background: rgba(0, 123, 255, 0.1);
+    }
+
+    /* Стиль для комментариев суперадминов с анимацией */
+    .comment-superadmin {
+        border-left: 4px solid var(--superadmin-gold);
+        background: rgba(255, 215, 0, 0.1);
+        animation: superadmin-glow 2s ease-in-out infinite alternate;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .comment-superadmin::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 215, 0, 0.2),
+            transparent);
+        animation: superadmin-shine 3s ease-in-out infinite;
+    }
+
+    @keyframes superadmin-glow {
+        from {
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        to {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+    }
+
+    @keyframes superadmin-shine {
+        0% {
+            left: -100%;
+        }
+        100% {
+            left: 100%;
+        }
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .comment-author {
+        font-weight: bold;
+        color: var(--secondary-pink);
+    }
+
+    .comment-author.admin {
+        color: var(--admin-blue);
+    }
+
+    .comment-author.superadmin {
+        color: var(--superadmin-gold);
+        text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+
+    .comment-role-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+
+    .role-user {
+        background: rgba(138, 43, 226, 0.3);
+        color: var(--secondary-pink);
+    }
+
+    .role-admin {
+        background: rgba(0, 123, 255, 0.3);
+        color: var(--admin-blue);
+    }
+
+    .role-superadmin {
+        background: rgba(255, 215, 0, 0.3);
+        color: var(--superadmin-gold);
+    }
+
+    .comment-date {
+        color: #ccc;
         font-size: 0.9rem;
     }
 
-    .comments-section {
-        margin-top: 3rem;
+    .comment-text {
+        color: #e0e0e0;
+        line-height: 1.5;
+        margin-bottom: 0.5rem;
     }
 
-    .comment-form {
-        background: var(--bg-card);
-        padding: 1.5rem;
+    .comment-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .no-comments {
+        text-align: center;
+        color: #ccc;
+        font-style: italic;
+        padding: 2rem;
+    }
+
+    .game-detail {
+        margin-bottom: 1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .game-detail-label {
+        font-weight: bold;
+        color: var(--secondary-pink);
+        min-width: 120px;
+        display: inline-block;
+    }
+
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .in-library-badge {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        padding: 1rem 2rem;
         border-radius: 10px;
-        margin-bottom: 2rem;
-    }
-
-    .comment-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .purchase-buttons {
-        display: flex;
-        gap: 1rem;
+        text-align: center;
+        font-weight: bold;
         margin-top: 1rem;
+    }
+
+    .form-control {
+        background-color: #2a2a2a;
+        border: 1px solid var(--primary-purple);
+        color: white;
+        border-radius: 8px;
+    }
+
+    .form-control:focus {
+        background-color: #2a2a2a;
+        border-color: var(--secondary-pink);
+        color: white;
+        box-shadow: 0 0 0 0.2rem rgba(255, 105, 180, 0.25);
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success {
+        background: rgba(40, 167, 69, 0.2);
+        border: 1px solid #28a745;
+        color: #d4edda;
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        color: #f8d7da;
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.2);
+        border: 1px solid #ffc107;
+        color: #fff3cd;
+    }
+
+    .alert-info {
+        background: rgba(23, 162, 184, 0.2);
+        border: 1px solid #17a2b8;
+        color: #d1ecf1;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .main-content {
+        flex: 1;
+    }
+
+    .comment-author-link {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.comment-author-link:hover {
+    text-decoration: underline;
+    transform: scale(1.02);
+}
+
+.admin-info {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 5px;
+}
+
+    footer {
+        margin-top: auto;
     }
   </style>
 </head>
 <body>
-<header>
-  <div class="header-content">
-    <div class="logo">GameStore</div>
-    <div class="auth-buttons" id="authButtons"></div>
-  </div>
-</header>
+<!-- Header Section -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="logo" th:href="@{/home}">GameStore</a>
 
-<main>
-  <div id="gameContent">
-    <!-- Контент игры будет загружен через JavaScript -->
-  </div>
-</main>
+    <div class="navbar-nav ms-auto">
+      <div th:if="${currentUser != null}" class="user-section">
+        <a th:href="@{/user/profile}" class="user-info">
+          <span th:text="${currentUser.username}"></span>
+          <br>
+          <small th:text="'Баланс: ' + ${#numbers.formatDecimal(currentUser.balance, 1, 2)} + ' ₽'"></small>
+        </a>
 
-<footer>
-  <div class="footer-content">
-    <div>&copy; 2024 GameStore Platform. Все права защищены.</div>
-    <div class="theme-switcher" onclick="toggleTheme()">
-      <span id="themeText">Тёмная тема</span>
+        <form th:action="@{/logout}" method="post" style="display: inline;">
+          <button type="submit" class="logout-btn">Выйти</button>
+        </form>
+      </div>
+      <div th:unless="${currentUser != null}" class="user-section">
+        <a class="login-btn" th:href="@{/login}">Войти в аккаунт</a>
+      </div>
     </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container mt-4 main-content">
+  <!-- Уведомления -->
+  <div th:if="${success}" class="alert alert-success" role="alert">
+    <span th:text="${success}">Успех!</span>
+  </div>
+
+  <div th:if="${error}" class="alert alert-danger" role="alert">
+    <span th:text="${error}">Ошибка!</span>
+  </div>
+
+  <!-- Заголовок игры -->
+  <div class="game-header">
+    <h1 class="game-title" th:text="${game.title}">Название игры</h1>
+    <div class="game-genres">
+      <th:block th:each="genre : ${game.genres}">
+        <a th:href="@{/home(genre=${genre})}" class="genre-badge" th:text="${genre}">Жанр</a>
+      </th:block>
+    </div>
+  </div>
+
+  <!-- Основная информация об игре -->
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="game-info-card">
+        <h3>Описание игры</h3>
+        <p th:text="${game.description} ?: 'Описание игры отсутствует.'"
+           style="line-height: 1.6; font-size: 1.1rem;">
+          Описание игры будет здесь...
+        </p>
+
+        <div class="mt-4">
+          <div class="game-detail" th:if="${game.developer}">
+            <span class="game-detail-label">Разработчик:</span>
+            <span th:text="${game.developer}"></span>
+          </div>
+
+          <div class="game-detail" th:if="${game.publisher}">
+            <span class="game-detail-label">Издатель:</span>
+            <span th:text="${game.publisher}"></span>
+          </div>
+
+          <div class="game-detail" th:if="${game.releaseDate}">
+            <span class="game-detail-label">Дата выхода:</span>
+            <span th:text="${#temporals.format(game.releaseDate, 'dd.MM.yyyy')}"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="game-info-card text-center">
+        <div class="game-price" th:text="${#numbers.formatDecimal(game.price, 1, 2)} + ' ₽'">
+          0 ₽
+        </div>
+
+        <!-- Кнопка покупки или сообщение о наличии в библиотеке -->
+        <div th:if="${currentUser != null}">
+          <div th:if="${inLibrary != null and inLibrary}">
+            <div class="in-library-badge">
+              ✓ Игра уже в вашей библиотеке
+            </div>
+          </div>
+          <div th:unless="${inLibrary != null and inLibrary}">
+            <a th:href="@{/purchase/game/{id}(id=${game.id})}"
+               class="btn btn-buy"
+               th:classappend="${currentUser.balance.compareTo(game.price) < 0} ? 'disabled' : ''">
+            <span th:if="${currentUser.balance.compareTo(game.price) >= 0}">
+                Купить сейчас
+            </span>
+              <span th:if="${currentUser.balance.compareTo(game.price) < 0}">
+                Недостаточно средств
+            </span>
+            </a>
+            <small th:if="${currentUser.balance.compareTo(game.price) < 0}"
+                   class="text-warning mt-2 d-block">
+              Не хватает:
+              <span th:text="${#numbers.formatDecimal(game.price.subtract(currentUser.balance), 1, 2)} + ' ₽'"></span>
+            </small>
+          </div>
+        </div>
+        <div th:unless="${currentUser != null}">
+          <a th:href="@{/login}" class="btn btn-buy">Войти для покупки</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Секция комментариев -->
+  <div class="comment-section">
+    <h3>Комментарии</h3>
+
+    <!-- Форма добавления/редактирования комментария -->
+    <div th:if="${currentUser != null and !currentUser.banned}" class="mb-4">
+      <div th:if="${userComment != null}">
+        <h5>Ваш комментарий</h5>
+        <form th:action="@{/game/{id}/comment/update(id=${game.id})}" method="post">
+          <div class="mb-3">
+                            <textarea class="form-control" name="commentText" rows="3"
+                                      th:text="${userComment.commentText}" required></textarea>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-edit">Изменить комментарий</button>
+            <form th:action="@{/game/{id}/comment/delete(id=${game.id})}" method="post" style="display: inline;">
+              <button type="submit" class="btn btn-delete"
+                      onclick="return confirm('Вы уверены, что хотите удалить комментарий?')">
+                Удалить комментарий
+              </button>
+            </form>
+          </div>
+        </form>
+      </div>
+      <div th:unless="${userComment != null}">
+        <form th:action="@{/game/{id}/comment(id=${game.id})}" method="post">
+          <div class="mb-3">
+            <label for="commentText" class="form-label">Добавить комментарий</label>
+            <textarea class="form-control" id="commentText" name="commentText"
+                      rows="3" placeholder="Напишите ваш отзыв об игре..."
+                      required></textarea>
+          </div>
+          <button type="submit" class="btn btn-buy">Отправить комментарий</button>
+        </form>
+      </div>
+    </div>
+
+    <div th:if="${currentUser != null and currentUser.banned}" class="alert alert-warning">
+      Вы забанены и не можете оставлять комментарии.
+    </div>
+
+    <div th:unless="${currentUser != null}" class="alert alert-info">
+      <a th:href="@{/login}" style="color: inherit; text-decoration: underline;">Войдите</a>, чтобы оставить комментарий.
+    </div>
+
+    <!-- Список комментариев -->
+    <div th:if="${comments != null and not #lists.isEmpty(comments)}">
+      <div th:each="comment : ${comments}"
+           th:class="${'comment-card ' + (comment.userRole == 'ADMIN' ? 'comment-admin' : '') + (comment.userRole == 'SUPERADMIN' ? 'comment-superadmin' : '')}">
+
+        <div class="comment-header">
+          <div>
+            <!-- Ссылка на профиль пользователя для админов -->
+            <a th:if="${currentUser != null and (currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN') and currentUser.username != comment.username}"
+               th:href="@{/user/{userId}(userId=${comment.userId})}"
+               th:class="${'comment-author ' + (comment.userRole == 'ADMIN' ? 'admin' : '') + (comment.userRole == 'SUPERADMIN' ? 'superadmin' : '')}"
+               style="text-decoration: none;">
+              <span th:text="${comment.username}">Пользователь</span>
+            </a>
+            <!-- Обычное отображение для не-админов или своего комментария -->
+            <span th:unless="${currentUser != null and (currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN') and currentUser.username != comment.username}"
+                  th:class="${'comment-author ' + (comment.userRole == 'ADMIN' ? 'admin' : '') + (comment.userRole == 'SUPERADMIN' ? 'superadmin' : '')}"
+                  th:text="${comment.username}">
+                    Пользователь
+                </span>
+
+            <span th:if="${comment.userRole != 'USER'}"
+                  th:class="${'comment-role-badge role-' + comment.userRole.toLowerCase()}"
+                  th:text="${comment.userRole}">
+                    Роль
+                </span>
+          </div>
+          <small class="comment-date" th:text="${#temporals.format(comment.createdAt, 'dd.MM.yyyy HH:mm')}">
+            01.01.2024 12:00
+          </small>
+        </div>
+
+        <div class="comment-text" th:text="${comment.commentText}">
+          Текст комментария...
+        </div>
+
+        <!-- Кнопки действий для своего комментария -->
+        <div th:if="${currentUser != null and currentUser.username == comment.username}"
+             class="comment-actions">
+          <button class="btn btn-edit" onclick="editMyComment()">Редактировать</button>
+          <form th:action="@{/games/{id}/comment/delete(id=${game.id})}" method="post" style="display: inline;">
+            <button type="submit" class="btn btn-delete"
+                    onclick="return confirm('Вы уверены, что хотите удалить комментарий?')">
+              Удалить
+            </button>
+          </form>
+        </div>
+
+        <!-- Информация для админов о чужом комментарии -->
+        <div th:if="${currentUser != null and (currentUser.role == 'ADMIN' or currentUser.role == 'SUPERADMIN') and currentUser.username != comment.username}"
+             class="comment-actions">
+          <small class="text-muted">
+            ID пользователя: <span th:text="${comment.userId}"></span>
+            <span th:if="${comment.userRole == 'ADMIN'}" class="text-warning"> • Администратор</span>
+            <span th:if="${comment.userRole == 'SUPERADMIN'}" class="text-warning"> • Суперадминистратор</span>
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${comments == null or #lists.isEmpty(comments)}" class="no-comments">
+      Пока нет комментариев. Будьте первым, кто оставит отзыв!
+    </div>
+  </div>
+</div>
+
+<footer class="bg-dark text-light text-center py-4 mt-5">
+  <div class="container">
+    <p>&copy; 2024 GameStore. Все права защищены.</p>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  function loadGamePage() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const gameId = parseInt(urlParams.get('id'));
-
-      const games = [
-          {
-              id: 1,
-              title: "The Witcher 3: Wild Hunt",
-              price: 1999,
-              image: "https://via.placeholder.com/600x400/6c63ff/ffffff?text=Witcher+3",
-              genres: ["RPG", "Adventure"],
-              description: "Эпическая RPG в фэнтезийном мире",
-              fullDescription: "Величайшая RPG современности. Отправляйтесь в эпическое путешествие по миру, полному монстров, магии и интриг.",
-              developer: "CD Projekt Red",
-              publisher: "CD Projekt",
-              releaseDate: "2015-05-19"
-          }
-          // Добавьте другие игры по аналогии
-      ];
-
-      const game = games.find(g => g.id === gameId);
-      if (!game) {
-          document.getElementById('gameContent').innerHTML = '<h1>Игра не найдена</h1>';
-          return;
-      }
-
-      const isInLibrary = currentUser && currentUser.library &&
-                         currentUser.library.some(g => g.id === gameId);
-
-      document.getElementById('gameContent').innerHTML = `
-          <div class="game-header">
-              <div>
-                  <img src="${game.image}" alt="${game.title}" class="game-image-large">
-              </div>
-              <div class="game-info">
-                  <h1>${game.title}</h1>
-                  <div class="game-genres">
-                      ${game.genres.map(genre => `<span class="genre-tag">${genre}</span>`).join('')}
-                  </div>
-                  <p>${game.fullDescription}</p>
-                  <div class="game-details">
-                      <p><strong>Разработчик:</strong> ${game.developer}</p>
-                      <p><strong>Издатель:</strong> ${game.publisher}</p>
-                      <p><strong>Дата выхода:</strong> ${new Date(game.releaseDate).toLocaleDateString()}</p>
-                  </div>
-                  <div class="game-price">${game.price} ₽</div>
-                  <div class="purchase-buttons">
-                      ${isInLibrary ?
-                          '<button class="btn btn-secondary" disabled>Уже в библиотеке</button>' :
-                          `<button class="btn btn-primary" onclick="buyGame(${game.id})">Купить</button>`
-                      }
-                  </div>
-              </div>
-          </div>
-
-          <div class="comments-section">
-              <h2>Отзывы</h2>
-              ${currentUser && !currentUser.isBanned && !isInLibrary ? `
-                  <div class="comment-form">
-                      <h3>Оставить комментарий</h3>
-                      <form id="commentForm">
-                          <div class="form-group">
-                              <textarea id="commentText" rows="4" placeholder="Ваш отзыв..." required></textarea>
-                          </div>
-                          <button type="submit" class="btn btn-primary">Отправить</button>
-                      </form>
-                  </div>
-              ` : ''}
-
-              <div class="comment-list" id="commentList">
-                  <!-- Комментарии будут здесь -->
-              </div>
-          </div>
-      `;
-
-      loadComments(gameId);
-      setupCommentForm(gameId);
+  function editMyComment() {
+      // Прокрутка к форме редактирования
+      document.querySelector('form[th\\:action*="/comment/update"]').scrollIntoView({
+          behavior: 'smooth'
+      });
   }
-
-  function loadComments(gameId) {
-      const comments = [
-          {
-              id: 1,
-              userId: 2,
-              username: "user1",
-              role: "USER",
-              text: "Отличная игра! Провел за ней сотни часов.",
-              date: "2024-01-15"
-          }
-      ];
-
-      const commentList = document.getElementById('commentList');
-      if (commentList) {
-          commentList.innerHTML = comments.map(comment => `
-              <div class="comment ${comment.role.toLowerCase()}">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                      <strong>${comment.username}</strong>
-                      <span style="color: var(--text-secondary); font-size: 0.9rem;">
-                          ${new Date(comment.date).toLocaleDateString()}
-                      </span>
-                  </div>
-                  <p>${comment.text}</p>
-              </div>
-          `).join('');
-      }
-  }
-
-  function setupCommentForm(gameId) {
-      const form = document.getElementById('commentForm');
-      if (form) {
-          form.addEventListener('submit', function(e) {
-              e.preventDefault();
-              const text = document.getElementById('commentText').value;
-
-              if (currentUser.isBanned) {
-                  alert('Ваш аккаунт заблокирован! Вы не можете оставлять комментарии.');
-                  return;
-              }
-
-              // Здесь будет логика сохранения комментария
-              alert('Комментарий отправлен!');
-              document.getElementById('commentText').value = '';
-          });
-      }
-  }
-
-  function buyGame(gameId) {
-      if (!currentUser) {
-          window.location.href = 'login.html';
-          return;
-      }
-      window.location.href = `cart.html?gameId=${gameId}`;
-  }
-
-  // Инициализация
-  document.addEventListener('DOMContentLoaded', function() {
-      loadTheme();
-      updateAuthButtons();
-      loadGamePage();
-  });
-
-  // Функции из common.html
-  function toggleTheme() { /* ... */ }
-  function loadTheme() { /* ... */ }
-  function updateAuthButtons() { /* ... */ }
-  function logout() { /* ... */ }
 </script>
 </body>
 </html>

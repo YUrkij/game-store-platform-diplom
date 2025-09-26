@@ -125,4 +125,11 @@ public class UserService {
         dto.setBalance(user.getBalance());
         return dto;
     }
+
+    public List<UserDTO> searchUsers(String query) {
+        return userRepository.findByUsernameOrEmale(query)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 }
