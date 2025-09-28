@@ -159,7 +159,6 @@
     // Обработка жанров
     document.querySelector('input[name="genresInput"]').addEventListener('input', function(e) {
         const genres = e.target.value.split(',').map(genre => genre.trim()).filter(genre => genre);
-        // Можно добавить предпросмотр тегов
     });
 </script>
 </body>
